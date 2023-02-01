@@ -9,15 +9,15 @@ import (
 	"time"
 )
 
-const traceIDHeader = "X-Trace-ID"
+const traceIDHeader = "X-Trace-id"
 
-func profilingMiddleware(log *zap.SugaredLogger) func(next http.Handler) http.Handler {
+func profilingMiddleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			rw := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 			defer func() {
 				start := time.Now()
-				log.With("status_code", rw.Status()).
+				zap.S().With("status_code", rw.Status()).
 					With("http_verb", r.Method).
 					With("bytes", rw.BytesWritten()).
 					With("latency", time.Since(start).Seconds()).

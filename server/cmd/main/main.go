@@ -2,32 +2,37 @@ package main
 
 import (
 	"context"
+	"go.uber.org/zap"
 	http2 "mancala/handler/http"
 	internalDB "mancala/internal/db"
-	internalLog "mancala/internal/log"
 	"mancala/internal/server"
+	"mancala/lobby"
 	"net/http"
-	"os/user"
 	"time"
 )
 
 func main() {
 
-	logger := internalLog.New()
+	l, _ := zap.NewDevelopment()
+	defer l.Sync()
+	zap.ReplaceGlobals(l)
+	logger := l.Sugar()
 
 	logger.Info("Starting the app")
 
 	db, err := internalDB.New()
 	if err != nil {
-		logger.Fatalf("Failed to connect to database: %v", err)
+		logger.Fatalf("Failed to connect to database: %v", err.Error())
 	}
 
 	ctx := context.Background()
 
 	// Migrate the schema
-	_ = db.AutoMigrate(&user.User{})
+	_ = db.AutoMigrate(&lobby.Lobby{})
 
-	srv := server.New(http2.NewHandler(logger))
+	lobbyService := lobby.NewService(db)
+
+	srv := server.New(http2.NewHandler(logger, lobbyService))
 	logger.With("addr", srv.Addr).Info("Starting the server")
 
 	done := make(chan struct{}, 1)
@@ -48,7 +53,7 @@ func main() {
 	}(done)
 
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Info("Server stopped")
+		logger.With("error", err).Info("Server stopped")
 	}
 	<-done
 

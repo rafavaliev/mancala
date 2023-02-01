@@ -4,7 +4,9 @@ go 1.20
 
 require (
 	github.com/go-chi/chi v1.5.4
+	github.com/go-chi/render v1.0.2
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/websocket v1.5.0
 	go.uber.org/zap v1.24.0
 	gorm.io/driver/postgres v1.4.6
 	gorm.io/gorm v1.24.3
@@ -12,6 +14,7 @@ require (
 )
 
 require (
+	github.com/ajg/form v1.5.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
