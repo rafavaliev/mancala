@@ -2,7 +2,6 @@ package mancala
 
 import (
 	"fmt"
-	"mancala/lobby"
 )
 
 /*
@@ -50,9 +49,9 @@ type Mancala struct {
 
 // Start creates new Mancala game
 // We don't define which player is first, it's always bottom one
-func Start(lob *lobby.Lobby) *Mancala {
+func Start(slug string) *Mancala {
 	return &Mancala{
-		LobbySlug:  lob.Slug,
+		LobbySlug:  slug,
 		Board:      NewBoard(),
 		NextPlayer: PlayerBottom,
 		Turn:       0,

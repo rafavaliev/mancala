@@ -13,16 +13,16 @@ var (
 	ErrNotFound = fmt.Errorf("lobby not found")
 )
 
-type Service struct {
+type Repository struct {
 	db *gorm.DB
 }
 
-func NewService(gorm *gorm.DB) *Service {
-	return &Service{db: gorm}
+func NewService(gorm *gorm.DB) *Repository {
+	return &Repository{db: gorm}
 }
 
 // Create creates a new lobby
-func (s *Service) Create(ctx context.Context) (*Lobby, error) {
+func (s *Repository) Create(ctx context.Context) (*Lobby, error) {
 	slug, _ := uuid.NewUUID()
 	l := &Lobby{Slug: slug.String()}
 	err := s.db.Create(l).Error
@@ -33,12 +33,12 @@ func (s *Service) Create(ctx context.Context) (*Lobby, error) {
 }
 
 // Delete deletes existing lobby
-func (s *Service) Delete(ctx context.Context, slug string) error {
+func (s *Repository) Delete(ctx context.Context, slug string) error {
 	return nil
 }
 
 // Update updates existing lobby
-func (s *Service) Get(ctx context.Context, slug string) (*Lobby, error) {
+func (s *Repository) Get(ctx context.Context, slug string) (*Lobby, error) {
 	var l Lobby
 	tx := s.db.Where("slug = ?", slug).First(&l)
 	if err := tx.Error; err != nil {
@@ -50,4 +50,21 @@ func (s *Service) Get(ctx context.Context, slug string) (*Lobby, error) {
 		}
 	}
 	return &l, nil
+}
+
+func (s *Repository) Join(ctx context.Context, slug string) (*Lobby, error) {
+	var l Lobby
+	tx := s.db.Where("slug = ?", slug).First(&l)
+	if err := tx.Error; err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return nil, ErrNotFound
+		default:
+			return nil, fmt.Errorf("failed to get a lobby: %w", err)
+		}
+	}
+	l.NumClients++
+	s.db.Save(&l)
+	return &l, nil
+
 }

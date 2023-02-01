@@ -36,3 +36,15 @@ services:
     environment:
       DATABASE_HOST: postgres
     container_name: mancala-server
+
+
+  react-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "3000:3000"
+    container_name: react-ui
+    stdin_open: true
+    volumes:
+      - ./client:/usr/src/app/mancala

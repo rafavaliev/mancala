@@ -7,6 +7,7 @@ import (
 	internalDB "mancala/internal/db"
 	"mancala/internal/server"
 	"mancala/lobby"
+	"mancala/mancala"
 	"net/http"
 	"time"
 )
@@ -28,11 +29,12 @@ func main() {
 	ctx := context.Background()
 
 	// Migrate the schema
-	_ = db.AutoMigrate(&lobby.Lobby{})
+	_ = db.AutoMigrate(&lobby.Lobby{}, &mancala.MancalaDB{})
 
 	lobbyService := lobby.NewService(db)
+	gameService := mancala.NewService(db)
 
-	srv := server.New(http2.NewHandler(logger, lobbyService))
+	srv := server.New(http2.NewHandler(logger, lobbyService, gameService))
 	logger.With("addr", srv.Addr).Info("Starting the server")
 
 	done := make(chan struct{}, 1)

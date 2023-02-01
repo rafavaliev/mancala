@@ -1,14 +1,13 @@
 package mancala
 
 import (
-	"mancala/lobby"
 	"reflect"
 	"testing"
 )
 
 func TestMancala_PlayTurn(t *testing.T) {
 
-	l := &lobby.Lobby{Slug: "hello"}
+	slug := "hello"
 
 	tests := []struct {
 		name      string
@@ -20,14 +19,14 @@ func TestMancala_PlayTurn(t *testing.T) {
 	}{
 		{
 			name:      "validation: wrong player's turn",
-			currState: Start(l),
+			currState: Start(slug),
 			player:    PlayerTop,
 			pitIndex:  0,
 			wantErr:   true,
 		},
 		{
 			name:      "validation: wrong pit index",
-			currState: Start(l),
+			currState: Start(slug),
 			player:    PlayerBottom,
 			pitIndex:  55,
 			wantErr:   true,
@@ -62,9 +61,9 @@ func TestMancala_PlayTurn(t *testing.T) {
 		},
 		{
 			name:      "bottom player turn gets another turn",
-			currState: Start(l),
+			currState: Start(slug),
 			wantState: func() *Mancala {
-				m := Start(l)
+				m := Start(slug)
 				m.Board.Bottom = [6]int{0, 7, 7, 7, 7, 7}
 				m.Board.BottomPlayerStore = 1
 				m.NextPlayer = PlayerBottom
@@ -76,12 +75,12 @@ func TestMancala_PlayTurn(t *testing.T) {
 		{
 			name: "bottom player turn doesn't affect top player's store ",
 			currState: func() *Mancala {
-				m := Start(l)
+				m := Start(slug)
 				m.Board.Bottom = [6]int{2, 2, 0, 0, 0, 8}
 				return m
 			}(),
 			wantState: func() *Mancala {
-				m := Start(l)
+				m := Start(slug)
 				m.Board.Bottom = [6]int{3, 2, 0, 0, 0, 0}
 				m.Board.BottomPlayerStore = 1
 				m.Board.Top = [6]int{7, 7, 7, 7, 7, 7}

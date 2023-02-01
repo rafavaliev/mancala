@@ -50,6 +50,9 @@ type Client struct {
 
 	// slug room that client belongs in
 	slug string
+
+	// playerID
+	playerNumber int
 }
 
 func NewClient(hub *Hub, conn *websocket.Conn) *Client {

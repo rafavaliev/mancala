@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func deleteLobby(svc *lobby.Service) http.HandlerFunc {
+func deleteLobby(svc *lobby.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
 
@@ -21,7 +21,7 @@ func deleteLobby(svc *lobby.Service) http.HandlerFunc {
 	}
 }
 
-func getLobby(svc *lobby.Service) http.HandlerFunc {
+func getLobby(svc *lobby.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
 
@@ -43,7 +43,7 @@ func getLobby(svc *lobby.Service) http.HandlerFunc {
 	}
 }
 
-func createLobby(svc *lobby.Service) http.HandlerFunc {
+func createLobby(svc *lobby.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		newLobby, err := svc.Create(r.Context())
@@ -54,5 +54,27 @@ func createLobby(svc *lobby.Service) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusCreated)
 		render.JSON(w, r, newLobby)
+	}
+}
+
+func joinLobby(svc *lobby.Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		slug := chi.URLParam(r, "slug")
+
+		l, err := svc.Join(r.Context(), slug)
+		switch {
+		case err == nil:
+			break
+		case err == lobby.ErrNotFound:
+			w.WriteHeader(http.StatusNotFound)
+			return
+		default:
+			zap.S().Error("could not get lobby", "error", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, l)
 	}
 }
